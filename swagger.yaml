@@ -1,0 +1,206 @@
+openapi: 3.0.0
+info:
+  title: La Liga Tracker API
+  description: API para gestionar partidos de La Liga
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+    description: Servidor de desarrollo
+paths:
+  /api/matches:
+    get:
+      summary: Obtener todos los partidos
+      description: Retorna una lista de todos los partidos registrados
+      responses:
+        '200':
+          description: Lista de partidos obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+    post:
+      summary: Crear un nuevo partido
+      description: Registra un nuevo partido en el sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchInput'
+      responses:
+        '201':
+          description: Partido creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: ID del partido creado
+        '400':
+          description: Datos de entrada inválidos
+
+  /api/matches/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del partido
+    get:
+      summary: Obtener un partido por ID
+      description: Retorna los detalles de un partido específico
+      responses:
+        '200':
+          description: Partido encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        '404':
+          description: Partido no encontrado
+    put:
+      summary: Actualizar un partido
+      description: Actualiza la información de un partido existente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchInput'
+      responses:
+        '200':
+          description: Partido actualizado exitosamente
+        '404':
+          description: Partido no encontrado
+        '400':
+          description: Datos de entrada inválidos
+    delete:
+      summary: Eliminar un partido
+      description: Elimina un partido del sistema
+      responses:
+        '200':
+          description: Partido eliminado exitosamente
+        '404':
+          description: Partido no encontrado
+
+  /api/matches/{id}/goals:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del partido
+    patch:
+      summary: Registrar un gol
+      description: Incrementa el contador de goles para un partido
+      responses:
+        '200':
+          description: Gol registrado exitosamente
+        '404':
+          description: Partido no encontrado
+
+  /api/matches/{id}/yellowcards:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del partido
+    patch:
+      summary: Registrar una tarjeta amarilla
+      description: Incrementa el contador de tarjetas amarillas para un partido
+      responses:
+        '200':
+          description: Tarjeta amarilla registrada exitosamente
+        '404':
+          description: Partido no encontrado
+
+  /api/matches/{id}/redcards:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del partido
+    patch:
+      summary: Registrar una tarjeta roja
+      description: Incrementa el contador de tarjetas rojas para un partido
+      responses:
+        '200':
+          description: Tarjeta roja registrada exitosamente
+        '404':
+          description: Partido no encontrado
+
+  /api/matches/{id}/extratime:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del partido
+    patch:
+      summary: Establecer tiempo extra
+      description: Marca un partido como que incluye tiempo extra
+      responses:
+        '200':
+          description: Tiempo extra establecido exitosamente
+        '404':
+          description: Partido no encontrado
+
+components:
+  schemas:
+    MatchInput:
+      type: object
+      required:
+        - homeTeam
+        - awayTeam
+        - matchDate
+      properties:
+        homeTeam:
+          type: string
+          description: Nombre del equipo local
+        awayTeam:
+          type: string
+          description: Nombre del equipo visitante
+        matchDate:
+          type: string
+          format: date
+          description: Fecha del partido (YYYY-MM-DD)
+    
+    Match:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identificador único del partido
+        homeTeam:
+          type: string
+          description: Nombre del equipo local
+        awayTeam:
+          type: string
+          description: Nombre del equipo visitante
+        matchDate:
+          type: string
+          format: date
+          description: Fecha del partido
+        goalCount:
+          type: integer
+          description: Número total de goles
+        yellowCards:
+          type: integer
+          description: Número de tarjetas amarillas
+        redCards:
+          type: integer
+          description: Número de tarjetas rojas
+        extraTime:
+          type: boolean
+          description: Indica si el partido tuvo tiempo extra
