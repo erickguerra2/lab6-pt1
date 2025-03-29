@@ -1,4 +1,5 @@
 # La Liga Tracker API
+![{CB486766-ABDE-48A3-8B8C-60132BBCA557}](https://github.com/user-attachments/assets/8ffc89af-59e6-468b-95f0-49c33ac1c7a4)
 
 ## Descripción
 
