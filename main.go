@@ -12,7 +12,7 @@ import (
 	"github.com/rs/cors"
 )
 
-// Match represents a football match
+// Match res la estructura que hace de base de datos
 type Match struct {
 	ID          int    `json:"id"`
 	HomeTeam    string `json:"homeTeam"`
@@ -24,14 +24,14 @@ type Match struct {
 	ExtraTime   bool   `json:"extraTime,omitempty"`
 }
 
-// MatchRepository manages match data
+// Maneja la información de Match
 type MatchRepository struct {
 	mu      sync.RWMutex
 	matches map[int]Match
 	nextID  int
 }
 
-// NewMatchRepository creates a new repository
+// Utiliza un mapa para guradar los matches
 func NewMatchRepository() *MatchRepository {
 	return &MatchRepository{
 		matches: make(map[int]Match),
@@ -39,7 +39,7 @@ func NewMatchRepository() *MatchRepository {
 	}
 }
 
-// GetAllMatches returns all matches
+// GetAllMatches muestra todos los partidos
 func (mr *MatchRepository) GetAllMatches() []Match {
 	mr.mu.RLock()
 	defer mr.mu.RUnlock()
@@ -51,7 +51,7 @@ func (mr *MatchRepository) GetAllMatches() []Match {
 	return matches
 }
 
-// GetMatchByID returns a match by its ID
+// GetMatchByID muestra el partido que se busca por ID
 func (mr *MatchRepository) GetMatchByID(id int) (Match, bool) {
 	mr.mu.RLock()
 	defer mr.mu.RUnlock()
@@ -60,7 +60,7 @@ func (mr *MatchRepository) GetMatchByID(id int) (Match, bool) {
 	return match, exists
 }
 
-// CreateMatch adds a new match
+// CreateMatch crea nuevos partidos
 func (mr *MatchRepository) CreateMatch(match Match) int {
 	mr.mu.Lock()
 	defer mr.mu.Unlock()
@@ -71,7 +71,7 @@ func (mr *MatchRepository) CreateMatch(match Match) int {
 	return match.ID
 }
 
-// UpdateMatch updates an existing match
+// UpdateMatch actualiza un partido existente
 func (mr *MatchRepository) UpdateMatch(id int, updatedMatch Match) bool {
 	mr.mu.Lock()
 	defer mr.mu.Unlock()
@@ -85,7 +85,7 @@ func (mr *MatchRepository) UpdateMatch(id int, updatedMatch Match) bool {
 	return true
 }
 
-// DeleteMatch removes a match by ID
+// DeleteMatch elimina un partido por su id
 func (mr *MatchRepository) DeleteMatch(id int) bool {
 	mr.mu.Lock()
 	defer mr.mu.Unlock()
@@ -98,7 +98,7 @@ func (mr *MatchRepository) DeleteMatch(id int) bool {
 	return true
 }
 
-// PATCH method handlers
+// PATCH method, maneja los metodos para registrar un gol, una tarjeta amarilla, una tarjeta rojo y el timepo extra
 func (mr *MatchRepository) RegisterGoal(id int) bool {
 	mr.mu.Lock()
 	defer mr.mu.Unlock()
@@ -159,7 +159,6 @@ func main() {
 	router := mux.NewRouter()
 	matchRepo := NewMatchRepository()
 
-	// CORS middleware
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
@@ -167,14 +166,12 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	// GET all matches
 	router.HandleFunc("/api/matches", func(w http.ResponseWriter, r *http.Request) {
 		matches := matchRepo.GetAllMatches()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(matches)
 	}).Methods("GET")
 
-	// GET match by ID
 	router.HandleFunc("/api/matches/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -193,7 +190,6 @@ func main() {
 		json.NewEncoder(w).Encode(match)
 	}).Methods("GET")
 
-	// POST create match
 	router.HandleFunc("/api/matches", func(w http.ResponseWriter, r *http.Request) {
 		var match Match
 		err := json.NewDecoder(r.Body).Decode(&match)
@@ -208,7 +204,6 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]int{"id": id})
 	}).Methods("POST")
 
-	// PUT update match
 	router.HandleFunc("/api/matches/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -232,7 +227,6 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("PUT")
 
-	// DELETE match
 	router.HandleFunc("/api/matches/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -249,7 +243,6 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("DELETE")
 
-	// PATCH goal registration
 	router.HandleFunc("/api/matches/{id}/goals", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -266,7 +259,6 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("PATCH")
 
-	// PATCH yellow card registration
 	router.HandleFunc("/api/matches/{id}/yellowcards", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -283,7 +275,6 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("PATCH")
 
-	// PATCH red card registration
 	router.HandleFunc("/api/matches/{id}/redcards", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -300,7 +291,6 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("PATCH")
 
-	// PATCH extra time setting
 	router.HandleFunc("/api/matches/{id}/extratime", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -317,7 +307,6 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("PATCH")
 
-	// Start server
 	handler := c.Handler(router)
 	port := 8081
 	fmt.Printf("Server is running on port %d\n", port)
