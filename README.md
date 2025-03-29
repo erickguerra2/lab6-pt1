@@ -97,10 +97,3 @@ PATCH /api/matches/{id}/redcards
 ```http
 PATCH /api/matches/{id}/extratime
 ```
-
-## Despliegue con Docker
-
-```sh
-docker build -t la-liga-tracker .
-docker run -p 8081:8081 la-liga-tracker
-```
